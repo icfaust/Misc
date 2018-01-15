@@ -1,0 +1,1 @@
+this contains a lot of odds and ends in various development stages so that I can at least preserve them before orphaning or develop them further
