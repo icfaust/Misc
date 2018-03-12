@@ -1,0 +1,21 @@
+\documentclass[10pt,a4paper]{letter}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\author{Ian Faust}
+\begin{document}
+The math question is to take an spheroid as defined by WGS84, take a heading and a distance and find a time zone.
+
+Step one is to find the new longitude and lattiude based off the old one. For a spherical coordinate system:
+\[
+d\vec{r} = dr\hat{r} + r d\phi\hat{\phi} + r \sin \phi d\theta\hat{\theta}
+\]
+In WGS84, the earth is defined as a reference ellipsoid with parameters $a$ and $1/f$, for the semi-major axis and the inverse flattness. The `radius' r is defined as:
+\[
+	r(\phi) = \frac{a}{\sqrt{1-(2f-f^2)\sin^2\phi}}
+\]
+Since r is only function of $\phi$, we 
+
+
+\end{document}
