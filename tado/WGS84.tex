@@ -13,9 +13,36 @@ d\vec{r} = dr\hat{r} + r d\phi\hat{\phi} + r \sin \phi d\theta\hat{\theta}
 \]
 In WGS84, the earth is defined as a reference ellipsoid with parameters $a$ and $1/f$, for the semi-major axis and the inverse flattness. The `radius' r is defined as:
 \[
-	r(\phi) = \frac{a}{\sqrt{1-(2f-f^2)\sin^2\phi}}
+	\rho(\phi) = \frac{a}{\sqrt{1-(2f-f^2)\sin^2\phi}}
 \]
-Since r is only function of $\phi$, we 
+Since r is only function of $\phi$, we want to integrate only across that when possible to simplify it. $\hat{l}$ is the distance travelled under the defined heading.
+\[
+\int_{\vec{r}_0}^{\vec{r}_1} \hat{l} \cdot d\vec{r} = \int_{\phi_0}^{\phi_1} \frac{d\rho}{d\phi}d\phi + \rho d\phi + \rho \sin \phi \frac{d\theta}{d\phi}d\phi
+\]
+The two unknown functions $\frac{d\rho}{d\phi}$ and $\frac{d\theta}{d\phi}$ can be defined from the definition of the ellipsoid surface $\rho(\phi)$ and the heading (a constant $h$) respectively.
+\[
+l = \int_{\vec{r}_0}^{\vec{r}_1} \hat{l} \cdot d\vec{r} = \rho(\phi_1) - \rho(\phi_0) + \int_{\phi_0}^{\phi_1} \rho + h\rho \sin \phi d\phi
+\]
+Ideally, this would have an analytic solution, but the alone $\rho$ term makes it (by definition) an elliptic integral (specifically the incomplete elliptic integral of the first kind).  The secondary term can be integrated using a change of variables leading to an inverse tangent function.  This unfortunately makes solving for $\phi$ an optimization problem, as an analytic solution cannot be calculated.
+\[
+l = \int_{\vec{r}_0}^{\vec{r}_1} \hat{l} \cdot d\vec{r} = \rho(\phi_1) - \rho(\phi_0) + a(F(\phi_1,2f-f^2) - F(\phi_0,2f-f^2))  + \int_{\phi_0}^{\phi_1} h\rho \sin \phi d\phi
+\]
+The last term can be dealt with separately.  Writing $\rho$ as a function of $\cos$ to properly change variables.
+\[
+h\int_{\phi_0}^{\phi_1} \frac{a}{\sqrt{1-(2f-f^2)\sin^2\phi}} \sin \phi d\phi = ha\int_{\phi_0}^{\phi_1} \frac{\sin \phi}{\sqrt{(1-f)^2+(2f-f^2)\cos^2\phi}}d\phi
+\]
+With $u = \cos \phi$
+\[
+h\int_{\phi_0}^{\phi_1} \frac{a}{\sqrt{1-(2f-f^2)\sin^2\phi}} \sin \phi d\phi = ha\int_{u_1}^{u_0} \frac{1}{\sqrt{(1-f)^2+(2f-f^2)u^2}}du
+\]
+\[
+= \frac{ha}{1-f} \int_{u_1}^{u_0} \frac{1}{\sqrt{1+\frac{(2f-f^2)}{(1-f)^2}u^2}}du
+\]
+$g  = \sqrt{\frac{(2f-f^2)}{(1-f)^2}}u$
+\[
+= \frac{ha}{\sqrt{2f-f^2}} \int_{g_1}^{g_0} \frac{1}{\sqrt{1+g^2}}dg= \frac{ha}{\sqrt{2f-f^2}}(\tan^{-1}(g_0) - \tan^{-1}(g_1))
+\]
+Using the definitions of $g$ and $u$ the original definition in $\phi$ can be written out.  This function of $\tan^{-1}$, $F$ and $\rho(\phi)$ will be minimized for a specified distance $l$ to yield the proper $\phi_1$.  With the heading, this can be used to calculated $\theta_1$. These can be used for time zone.
 
-
+One thing to note is that great care must be taken going over a pole. I am not sure if it will break so I will likely have to code in a special try catch for it. 
 \end{document}
