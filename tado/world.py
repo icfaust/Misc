@@ -1,22 +1,147 @@
 import scipy
 import matplotlib.pyplot as plt
 import scipy.optimize
+from scipy.special import ellipkinc as F
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 
-class world(object):
+a = 6378137. #m
+f = 1./298.257223563
+r = a*(1. - f/3.) #m
 
-    self.a = 6378137.
-    self.f = 1./298.257223563
+_length_conversion = {'m': {'m': 1.0,
+                            'cm': 100.0,
+                            'mm': 1000.0,
+                            'km': 1e-3,
+                            'in': 39.37,
+                            'ft': 39.37 / 12.0,
+                            'yd': 39.37 / (12.0 * 3.0),
+                            'smoot': 39.37 / 67.0,
+                            'cubit': 39.37 / 18.0,
+                            'hand': 39.37 / 4.0,
+                            'mi': 39.37 / 12.0 / 5280.},
+                      'cm': {'m': 0.01,
+                             'cm': 1.0,
+                             'mm': 10.0,
+                             'km': 1e-4,
+                             'in': 39.37 / 100.0,
+                             'ft': 39.37 / (100.0 * 12.0),
+                             'yd': 39.37 / (100.0 * 12.0 * 3.0),
+                             'smoot': 39.37 / (100.0 * 67.0),
+                             'cubit': 39.37 / (100.0 * 18.0),
+                             'hand': 39.37 / (100.0 * 4.0),
+                             'mi': 39.37 / (100 * 12.0 * 5280.)},
+                      'mm': {'m': 0.001,
+                             'cm': 0.1,
+                             'mm': 1.0,
+                             'km': 1e6,
+                             'in': 39.37 / 1000.0,
+                             'ft': 39.37 / (1000.0 * 12.0),
+                             'yd': 39.37 / (1000.0 * 12.0 * 3.0),
+                             'smoot': 39.37 / (1000.0 * 67.0),
+                             'cubit': 39.37 / (1000.0 * 18.0),
+                             'hand': 39.37 / (1000.0 * 4.0),
+                             'mi': 39.37 / (1000.0* 12.0 * 5280)},
+                      'km': {'m': 1000.0,
+                             'cm': 1e5,
+                             'mm': 1e6,
+                             'km': 1.0,
+                             'in': 3.937e4,
+                             'ft': 3.937e4 / 12.0,
+                             'yd': 3.937e4 / (12.0 * 3.0),
+                             'smoot': 3.937e4 / 67.0,
+                             'cubit': 3.937e4 / 18.0,
+                             'hand': 3.937e4 / 4.0,
+                             'mi': 3.937e4 / 12.0 / 5280.},
+                      'in': {'m': 1.0 / 39.37,
+                             'cm': 100.0 / 39.37,
+                             'mm': 1000.0 / 39.37,
+                             'km': 1e-3 / 39.37,
+                             'in': 1.0,
+                             'ft': 1.0 / 12.0,
+                             'yd': 1.0 / (12.0 * 3.0),
+                             'smoot': 1.0 / 67.0,
+                             'cubit': 1.0 / 18.0,
+                             'hand': 1.0 / 4.0,
+                             'mi': 1.0 / (12.0 * 5280.)},
+                      'ft': {'m': 12.0 / 39.37,
+                             'cm': 12.0 * 100.0 / 39.37,
+                             'mm': 12.0 * 1000.0 / 39.37,
+                             'km': 1.2e-2 / 39.37 ,
+                             'in': 12.0,
+                             'ft': 1.0,
+                             'yd': 1.0 / 3.0,
+                             'smoot': 12.0 / 67.0,
+                             'cubit': 12.0 / 18.0,
+                             'hand': 12.0 / 4.0,
+                             'mi': 1.0 / 5280.},
+                      'yd': {'m': 3.0 * 12.0 / 39.37,
+                             'cm': 3.0 * 12.0 * 100.0 / 39.37,
+                             'mm': 3.0 * 12.0 * 1000.0 / 39.37,
+                             'km': 3.6e-2 / 39.37,
+                             'in': 3.0 * 12.0,
+                             'ft': 3.0,
+                             'yd': 1.0,
+                             'smoot': 3.0 * 12.0 / 67.0,
+                             'cubit': 3.0 * 12.0 / 18.0,
+                             'hand': 3.0 * 12.0 / 4.0,
+                             'mi': 3.0 / 5280.},
+                    'smoot': {'m': 67.0 / 39.37,
+                              'cm': 67.0 * 100.0 / 39.37,
+                              'mm': 67.0 * 1000.0 / 39.37,
+                              'km': 6.7e-2 / 39.37,
+                              'in': 67.0,
+                              'ft': 67.0 / 12.0,
+                              'yd': 67.0 / (12.0 * 3.0),
+                              'smoot': 1.0,
+                              'cubit': 67.0 / 18.0,
+                              'hand': 67.0 / 4.0,
+                              'mi': 67.0 / 12.0 / 5280.},
+                    'cubit': {'m': 18.0 / 39.37,
+                              'cm': 18.0 * 100.0 / 39.37,
+                              'mm': 18.0 * 1000.0 / 39.37,
+                              'km': 1.8e-2 /39.37,
+                              'in': 18.0,
+                              'ft': 18.0 / 12.0,
+                              'yd': 18.0 / (12.0 * 3.0),
+                              'smoot': 18.0 / 67.0,
+                              'cubit': 1.0,
+                              'hand': 18.0 / 4.0,
+                              'mi': 1.5 / 5280. },
+                    'hand': {'m': 4.0 / 39.37,
+                             'cm': 4.0 * 100.0 / 39.37,
+                             'mm': 4.0 * 1000.0 / 39.37,
+                             'km': 4.0 / 3.937e4,
+                             'in': 4.0,
+                             'ft': 4.0 / 12.0,
+                             'yd': 4.0 / (12.0 * 3.0),
+                             'smoot': 4.0 / 67.0,
+                             'cubit': 4.0 / 18.0,
+                             'hand': 1.0,
+                             'mi': 1. / (3. * 5280.)},
+                      'mi':{'m': 39.37 / 1.0,
+                            'cm': 39.37 / 100.0,
+                            'mm': 39.37 / 1000.0,
+                            'km': 12.0 * 5280. / 39.37,
+                            'in': 5280. * 12.,
+                            'ft': 5280.,
+                            'yd': 5280./ 3.0,
+                            'smoot': 5280. * 12.0 / 67.0,
+                            'cubit': 39.37 / 18.0,
+                            'hand': 39.37 / 4.0,
+                            'mi':1.0 }}
 
+
+def eval(phi0, theta0, bearing, distance):
+    delta = distance/World.r
+    phi1 = scipy.arcsin(scipy.sin(phi0)*scipy.cos(delta) +
+                        scipy.cos(phi0)*scipy.sin(delta)*scipy.cos(b))
     
-    def __init__(self, longitude, latitude, heading):
+    theta1 = scipy.theta0 + scipy.arctan2(scipy.sin(b)*scipy.sin(delta)*scipy.cos(phi0),
+                                          scipy.cos(delta) - scipy.sin(phi0)*scipy.sin(phi1))
+        
+    return phi1, theta1
 
-        self.longitude = longitude
-        self.lattitude = latitude
-        self.heading = heading
-
-    def rho(self, phi):
-        return pow(self.a,2)/scipy.sqrt(pow(self.a,2) + pow(scipy.cos(phi)
-
-    def call(self, angle):
-
-        return 
+def _translatePos(phi0, theta0):
+    return phi0*scipy.pi/180., theta0/scipy.pi/180.
