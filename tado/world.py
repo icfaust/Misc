@@ -1,8 +1,5 @@
 import scipy
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
 
 a = 6378137. #m from WGS84
 f = 1./298.257223563 # from the inverse flattening defined in WGS84
@@ -22,7 +19,7 @@ def eval(phi0, theta0, b, distance):
     # when at a pole
     elif abs(phi0) == scipy.pi/2.:
         phi1 = phi0 + -1*scipy.sign(phi0)*delta
-        theta1 = bearing
+        theta1 = b
 
     phi1 = phi1*180/scipy.pi
     theta1 = ((theta1*180/scipy.pi + 540.) % 360.) - 180.
