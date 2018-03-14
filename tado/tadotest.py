@@ -67,7 +67,7 @@ def getTimeZone(latitude, longitude):
                                         "by":'position',
                                         "format":'json',
                                         "lat":str(latitude),
-                                        "lng":str(longitude)+'E'})
+                                        "lng":str(longitude)})
 
     #query the API through the urlopen function
     print(timeZoneUrlBase+'get-time-zone?'+timeZoneAPIQuery)
