@@ -111,6 +111,38 @@ def test3(l=1.):
     print('step4')    
     return output
 
+def createPlate(shape,l=1.,s=[[.03,.06],[.02,.05],[.01,.04],[.0,.03]],num=[1e4,2e4,5e4,1e5]):
+    """ generates circles for an ishihara plate (inside a circle)
+
+
+    Given an array of numpy/scipy arrays of X,Y coordinates describing a 2D polygon,
+    it will randomly place circles of 
+
+
+    Args:
+        shape (Array-like): Array of cartesian-coordinates of the vertices of the polygon.
+                            It is a list of numpy/scipy arrays, so that polygons may vary
+                            in number of vertices with general shape: (polygon,coordinates,2).
+                            X-coordinates for polygon i: (i,:,0)
+                            Y-coordinates for polygon i: (i,:,1)
+
+    Kwargs:
+        l (float): Used to scale the size of the circle to encompass all polygons
+        s (n x 2 array): is fractional size of the random circle to place (compare to large)
+        num (n array): is the number of tries to attempt, later steps require more tries
+
+    Returns:
+        output (list): list of 3 elements which is the cartesian coordinates and size of circle
+
+    """
+
+    output = []
+    
+    for i in xrange(len(num)):
+        print('step '+str(i+1)+' of '+str(len(num)))
+        output = shapeIshi(shape,l=l,s=s[i],num=num[i],output=output) 
+    return output
+
 
 def plotShape(shape):
     plt.plot(shape[...,0],shape[...,1],'b')
@@ -142,7 +174,7 @@ def plotIshi(stuff, color=None):
     plt.gca().set_aspect('equal')
 
 def circTest(pt1,pt2,circ,r):
-    print(pt1,pt2,circ,r)
+    #print(pt1,pt2,circ,r)
     vec1 = pt2-pt1
     vec2 = circ-pt1
     A = scipy.sum(vec1**2)
